@@ -7,7 +7,7 @@
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
-		<title>Optics Engineering: High-Wrap Frames</title>
+		<title>Optics Engineering: Advanced Wrap Dynamics</title>
 		<style>
 			:root {
 				--bg: #fdfdfc;
@@ -23,20 +23,9 @@
 				margin: 0;
 				padding: 2rem 1rem;
 			}
-			article {
-				max-width: 800px;
-				margin: 0 auto;
-			}
-			h1 {
-				font-size: 2.5rem;
-				letter-spacing: -0.02em;
-				margin-bottom: 0.5rem;
-			}
-			p {
-				font-size: 1.125rem;
-				color: #374151;
-				margin-bottom: 1.5rem;
-			}
+			article { max-width: 900px; margin: 0 auto; }
+			h1 { font-size: 2.5rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+			p { font-size: 1.125rem; color: #374151; margin-bottom: 1.5rem; }
 			.simulator-card {
 				background: white;
 				border: 1px solid var(--border);
@@ -53,19 +42,9 @@
 				padding-bottom: 2rem;
 				border-bottom: 1px solid var(--border);
 			}
-			.control-group {
-				display: flex;
-				flex-direction: column;
-				gap: 0.5rem;
-			}
-			label {
-				font-weight: 600;
-				font-size: 0.875rem;
-			}
-			select, input[type="range"] {
-				width: 100%;
-				padding: 0.5rem;
-			}
+			.control-group { display: flex; flex-direction: column; gap: 0.5rem; }
+			label { font-weight: 600; font-size: 0.875rem; }
+			select, input[type="range"] { width: 100%; padding: 0.5rem; }
 			.visuals {
 				display: grid;
 				grid-template-columns: 1fr 1fr;
@@ -78,20 +57,17 @@
 				border-radius: 8px;
 			}
 			.canvas-label {
-				text-align: center;
-				font-weight: 600;
-				margin-top: 0.5rem;
-				font-size: 0.875rem;
-				color: #4b5563;
+				text-align: center; font-weight: 600; margin-top: 0.5rem;
+				font-size: 0.875rem; color: #4b5563;
 			}
 		</style>
 	</head>
 	<body>
 		<article>
-			<h1>The Physics of Wrapped Lenses</h1>
-			<p>Standard spheric lenses are designed under the assumption that the lens will sit completely flat in front of your face. When you place a standard lens into a sports frame (like an Adidas or Oakley) that wraps around the head, the lens tilts relative to the eye.</p>
+			<h1>Advanced Wrap Dynamics: The Base Curve</h1>
+			<p>A true sports simulation requires understanding the <strong>Base Curve</strong>. The Base Curve dictates the physical curvature of the front of the lens. A low base curve (Base 2-4) is flat, while a high base curve (Base 8-10) wraps around the skull.</p>
 			
-			<p>This tilt introduces severe optical errors: <strong>induced astigmatism</strong> and the <strong>"fishbowl" distortion</strong> effect. To counteract this, premium labs use CNC generators to carve <strong>Digitally Compensated (Freeform)</strong> lenses, calculating the exact wrap angle and adjusting the prescription pixel-by-pixel to bounce the light perfectly onto the fovea.</p>
+			<p>Notice how increasing the Base Curve changes the physical geometry of the lens in the simulation below. Even with a high Base 8 curve that physically fits a sports frame, a standard Spheric architecture will fail optically because the visual axis is misaligned. Freeform calculation is required to align the optical properties with the physical wrap.</p>
 
 			<div class="simulator-card">
 				<div class="controls">
@@ -106,12 +82,16 @@
 						<label for="wrapAngle">Frame Wrap Angle: <span id="wrapVal">15</span>°</label>
 						<input type="range" id="wrapAngle" min="0" max="30" value="15">
 					</div>
+					<div class="control-group">
+						<label for="baseCurve">Base Curve: <span id="baseVal">8</span></label>
+						<input type="range" id="baseCurve" min="2" max="10" value="8">
+					</div>
 				</div>
 
 				<div class="visuals">
 					<div>
 						<canvas id="rayCanvas" width="400" height="300"></canvas>
-						<div class="canvas-label">Ray Tracing & Focal Point</div>
+						<div class="canvas-label">Ray Tracing & Lens Geometry</div>
 					</div>
 					<div>
 						<canvas id="gridCanvas" width="400" height="300"></canvas>
@@ -119,94 +99,93 @@
 					</div>
 				</div>
 			</div>
-
-			<p>Notice how increasing the wrap angle on a Spheric lens causes the light rays to miss the back of the retina, resulting in severe barrel distortion on the visual grid. Switching to the Freeform architecture recalculates the rear surface of the lens to correct the focal path, regardless of the frame's angle.</p>
 		</article>
 
 		<script>
-			// Simulator Logic
 			const lensType = document.getElementById('lensType');
 			const wrapAngle = document.getElementById('wrapAngle');
+			const baseCurve = document.getElementById('baseCurve');
 			const wrapVal = document.getElementById('wrapVal');
+			const baseVal = document.getElementById('baseVal');
 			const rayCtx = document.getElementById('rayCanvas').getContext('2d');
 			const gridCtx = document.getElementById('gridCanvas').getContext('2d');
 
 			function drawSimulator() {
 				const type = lensType.value;
 				const angle = parseInt(wrapAngle.value);
-				wrapVal.innerText = angle;
+				const curve = parseInt(baseCurve.value);
 				
-				drawRayTrace(type, angle);
-				drawGrid(type, angle);
+				wrapVal.innerText = angle;
+				baseVal.innerText = curve;
+				
+				drawRayTrace(type, angle, curve);
+				drawGrid(type, angle, curve);
 			}
 
-			function drawRayTrace(type, angle) {
+			function drawRayTrace(type, angle, curve) {
 				rayCtx.clearRect(0, 0, 400, 300);
 				
 				// Draw Eye
-				rayCtx.beginPath();
-				rayCtx.arc(320, 150, 40, 0, Math.PI * 2);
-				rayCtx.strokeStyle = '#333';
-				rayCtx.lineWidth = 2;
-				rayCtx.stroke();
-				rayCtx.fillStyle = '#fff';
-				rayCtx.fill();
+				rayCtx.beginPath(); rayCtx.arc(320, 150, 40, 0, Math.PI * 2);
+				rayCtx.strokeStyle = '#333'; rayCtx.lineWidth = 2; rayCtx.stroke();
+				rayCtx.fillStyle = '#fff'; rayCtx.fill();
 				
-				// Draw Retina/Fovea target
-				rayCtx.beginPath();
-				rayCtx.arc(360, 150, 4, 0, Math.PI * 2);
-				rayCtx.fillStyle = 'red';
-				rayCtx.fill();
+				// Draw Retina target
+				rayCtx.beginPath(); rayCtx.arc(360, 150, 4, 0, Math.PI * 2);
+				rayCtx.fillStyle = 'red'; rayCtx.fill();
 
-				// Draw Lens
+				// Draw Lens Geometry
 				rayCtx.save();
 				rayCtx.translate(200, 150);
 				rayCtx.rotate((angle * Math.PI) / 180);
 				
+				// Morph physical curve based on Base Curve slider
+				const curveStr = curve * 8; 
 				rayCtx.beginPath();
-				rayCtx.moveTo(0, -80);
-				rayCtx.quadraticCurveTo(20, 0, 0, 80);
-				rayCtx.quadraticCurveTo(-10, 0, 0, -80);
-				rayCtx.fillStyle = 'rgba(37, 99, 235, 0.3)';
-				rayCtx.fill();
-				rayCtx.strokeStyle = '#2563eb';
-				rayCtx.stroke();
+				rayCtx.moveTo(0, -90);
+				rayCtx.quadraticCurveTo(curveStr, 0, 0, 90); // Front surface
+				rayCtx.quadraticCurveTo(curveStr - 15, 0, 0, -90); // Back surface
+				
+				rayCtx.fillStyle = 'rgba(37, 99, 235, 0.3)'; rayCtx.fill();
+				rayCtx.strokeStyle = '#2563eb'; rayCtx.stroke();
 				rayCtx.restore();
 
 				// Draw Light Rays
-				rayCtx.strokeStyle = 'rgba(250, 204, 21, 0.8)'; // Yellow light rays
+				rayCtx.strokeStyle = 'rgba(250, 204, 21, 0.8)'; 
 				rayCtx.lineWidth = 2;
 
 				const rays = [-40, -20, 0, 20, 40];
 				rays.forEach(yOffset => {
 					rayCtx.beginPath();
 					rayCtx.moveTo(0, 150 + yOffset);
-					rayCtx.lineTo(200, 150 + yOffset); // Ray hits lens
+					rayCtx.lineTo(200, 150 + yOffset);
 					
-					// Calculate focal deviation based on lens type and angle
 					let deviation = 0;
 					if (type === 'spheric') {
-						deviation = (angle / 30) * yOffset * 1.5; 
+						// Distortion relies on wrap tilt and base curve physics
+						const flatError = (10 - curve) * 0.5;
+						deviation = ((angle / 30) * yOffset * 1.5) + (flatError * (yOffset/40)); 
 					}
 					
-					rayCtx.lineTo(360, 150 + deviation); // Ray goes to eye
+					rayCtx.lineTo(360, 150 + deviation);
 					rayCtx.stroke();
 				});
 			}
 
-			function drawGrid(type, angle) {
+			function drawGrid(type, angle, curve) {
 				gridCtx.clearRect(0, 0, 400, 300);
 				gridCtx.strokeStyle = '#9ca3af';
 				gridCtx.lineWidth = 1;
 
-				const distortionLevel = type === 'spheric' ? (angle / 30) * 20 : 0;
+				let distortionLevel = 0;
+				if (type === 'spheric') {
+					distortionLevel = ((angle / 30) * 15) + ((10 - curve) * 1.5);
+				}
 
 				for (let x = 0; x <= 400; x += 40) {
-					gridCtx.beginPath();
-					gridCtx.moveTo(x, 0);
+					gridCtx.beginPath(); gridCtx.moveTo(x, 0);
 					for (let y = 0; y <= 300; y += 10) {
-						let dx = x - 200;
-						let dy = y - 150;
+						let dx = x - 200, dy = y - 150;
 						let distance = Math.sqrt(dx*dx + dy*dy);
 						let distortAmount = 1 + (distance * distortionLevel) / 10000;
 						gridCtx.lineTo(200 + dx * distortAmount, 150 + dy * distortAmount);
@@ -215,11 +194,9 @@
 				}
 
 				for (let y = 0; y <= 300; y += 40) {
-					gridCtx.beginPath();
-					gridCtx.moveTo(0, y);
+					gridCtx.beginPath(); gridCtx.moveTo(0, y);
 					for (let x = 0; x <= 400; x += 10) {
-						let dx = x - 200;
-						let dy = y - 150;
+						let dx = x - 200, dy = y - 150;
 						let distance = Math.sqrt(dx*dx + dy*dy);
 						let distortAmount = 1 + (distance * distortionLevel) / 10000;
 						gridCtx.lineTo(200 + dx * distortAmount, 150 + dy * distortAmount);
@@ -228,11 +205,9 @@
 				}
 			}
 
-			// Event Listeners
 			lensType.addEventListener('change', drawSimulator);
 			wrapAngle.addEventListener('input', drawSimulator);
-			
-			// Initial Draw
+			baseCurve.addEventListener('input', drawSimulator);
 			drawSimulator();
 		</script>
 	</body>
