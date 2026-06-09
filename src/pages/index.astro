@@ -1,50 +1,239 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+// src/pages/index.astro
 ---
 
-<!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Optics Engineering: High-Wrap Frames</title>
+		<style>
+			:root {
+				--bg: #fdfdfc;
+				--text: #1a1a1a;
+				--accent: #2563eb;
+				--border: #e5e7eb;
+			}
+			body {
+				font-family: system-ui, -apple-system, sans-serif;
+				background-color: var(--bg);
+				color: var(--text);
+				line-height: 1.6;
+				margin: 0;
+				padding: 2rem 1rem;
+			}
+			article {
+				max-width: 800px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 2.5rem;
+				letter-spacing: -0.02em;
+				margin-bottom: 0.5rem;
+			}
+			p {
+				font-size: 1.125rem;
+				color: #374151;
+				margin-bottom: 1.5rem;
+			}
+			.simulator-card {
+				background: white;
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 2rem;
+				margin: 3rem 0;
+				box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+			}
+			.controls {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1.5rem;
+				margin-bottom: 2rem;
+				padding-bottom: 2rem;
+				border-bottom: 1px solid var(--border);
+			}
+			.control-group {
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+			label {
+				font-weight: 600;
+				font-size: 0.875rem;
+			}
+			select, input[type="range"] {
+				width: 100%;
+				padding: 0.5rem;
+			}
+			.visuals {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 2rem;
+			}
+			canvas {
+				width: 100%;
+				background: #f8fafc;
+				border: 1px solid var(--border);
+				border-radius: 8px;
+			}
+			.canvas-label {
+				text-align: center;
+				font-weight: 600;
+				margin-top: 0.5rem;
+				font-size: 0.875rem;
+				color: #4b5563;
+			}
+		</style>
 	</head>
 	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
+		<article>
+			<h1>The Physics of Wrapped Lenses</h1>
+			<p>Standard spheric lenses are designed under the assumption that the lens will sit completely flat in front of your face. When you place a standard lens into a sports frame (like an Adidas or Oakley) that wraps around the head, the lens tilts relative to the eye.</p>
+			
+			<p>This tilt introduces severe optical errors: <strong>induced astigmatism</strong> and the <strong>"fishbowl" distortion</strong> effect. To counteract this, premium labs use CNC generators to carve <strong>Digitally Compensated (Freeform)</strong> lenses, calculating the exact wrap angle and adjusting the prescription pixel-by-pixel to bounce the light perfectly onto the fovea.</p>
+
+			<div class="simulator-card">
+				<div class="controls">
+					<div class="control-group">
+						<label for="lensType">Lens Architecture</label>
+						<select id="lensType">
+							<option value="spheric">Standard Spheric</option>
+							<option value="freeform">Digitally Compensated (Freeform)</option>
+						</select>
+					</div>
+					<div class="control-group">
+						<label for="wrapAngle">Frame Wrap Angle: <span id="wrapVal">15</span>°</label>
+						<input type="range" id="wrapAngle" min="0" max="30" value="15">
+					</div>
+				</div>
+
+				<div class="visuals">
+					<div>
+						<canvas id="rayCanvas" width="400" height="300"></canvas>
+						<div class="canvas-label">Ray Tracing & Focal Point</div>
+					</div>
+					<div>
+						<canvas id="gridCanvas" width="400" height="300"></canvas>
+						<div class="canvas-label">Peripheral Vision Simulator</div>
+					</div>
+				</div>
+			</div>
+
+			<p>Notice how increasing the wrap angle on a Spheric lens causes the light rays to miss the back of the retina, resulting in severe barrel distortion on the visual grid. Switching to the Freeform architecture recalculates the rear surface of the lens to correct the focal path, regardless of the frame's angle.</p>
+		</article>
+
+		<script>
+			// Simulator Logic
+			const lensType = document.getElementById('lensType');
+			const wrapAngle = document.getElementById('wrapAngle');
+			const wrapVal = document.getElementById('wrapVal');
+			const rayCtx = document.getElementById('rayCanvas').getContext('2d');
+			const gridCtx = document.getElementById('gridCanvas').getContext('2d');
+
+			function drawSimulator() {
+				const type = lensType.value;
+				const angle = parseInt(wrapAngle.value);
+				wrapVal.innerText = angle;
+				
+				drawRayTrace(type, angle);
+				drawGrid(type, angle);
+			}
+
+			function drawRayTrace(type, angle) {
+				rayCtx.clearRect(0, 0, 400, 300);
+				
+				// Draw Eye
+				rayCtx.beginPath();
+				rayCtx.arc(320, 150, 40, 0, Math.PI * 2);
+				rayCtx.strokeStyle = '#333';
+				rayCtx.lineWidth = 2;
+				rayCtx.stroke();
+				rayCtx.fillStyle = '#fff';
+				rayCtx.fill();
+				
+				// Draw Retina/Fovea target
+				rayCtx.beginPath();
+				rayCtx.arc(360, 150, 4, 0, Math.PI * 2);
+				rayCtx.fillStyle = 'red';
+				rayCtx.fill();
+
+				// Draw Lens
+				rayCtx.save();
+				rayCtx.translate(200, 150);
+				rayCtx.rotate((angle * Math.PI) / 180);
+				
+				rayCtx.beginPath();
+				rayCtx.moveTo(0, -80);
+				rayCtx.quadraticCurveTo(20, 0, 0, 80);
+				rayCtx.quadraticCurveTo(-10, 0, 0, -80);
+				rayCtx.fillStyle = 'rgba(37, 99, 235, 0.3)';
+				rayCtx.fill();
+				rayCtx.strokeStyle = '#2563eb';
+				rayCtx.stroke();
+				rayCtx.restore();
+
+				// Draw Light Rays
+				rayCtx.strokeStyle = 'rgba(250, 204, 21, 0.8)'; // Yellow light rays
+				rayCtx.lineWidth = 2;
+
+				const rays = [-40, -20, 0, 20, 40];
+				rays.forEach(yOffset => {
+					rayCtx.beginPath();
+					rayCtx.moveTo(0, 150 + yOffset);
+					rayCtx.lineTo(200, 150 + yOffset); // Ray hits lens
+					
+					// Calculate focal deviation based on lens type and angle
+					let deviation = 0;
+					if (type === 'spheric') {
+						deviation = (angle / 30) * yOffset * 1.5; 
+					}
+					
+					rayCtx.lineTo(360, 150 + deviation); // Ray goes to eye
+					rayCtx.stroke();
+				});
+			}
+
+			function drawGrid(type, angle) {
+				gridCtx.clearRect(0, 0, 400, 300);
+				gridCtx.strokeStyle = '#9ca3af';
+				gridCtx.lineWidth = 1;
+
+				const distortionLevel = type === 'spheric' ? (angle / 30) * 20 : 0;
+
+				for (let x = 0; x <= 400; x += 40) {
+					gridCtx.beginPath();
+					gridCtx.moveTo(x, 0);
+					for (let y = 0; y <= 300; y += 10) {
+						let dx = x - 200;
+						let dy = y - 150;
+						let distance = Math.sqrt(dx*dx + dy*dy);
+						let distortAmount = 1 + (distance * distortionLevel) / 10000;
+						gridCtx.lineTo(200 + dx * distortAmount, 150 + dy * distortAmount);
+					}
+					gridCtx.stroke();
+				}
+
+				for (let y = 0; y <= 300; y += 40) {
+					gridCtx.beginPath();
+					gridCtx.moveTo(0, y);
+					for (let x = 0; x <= 400; x += 10) {
+						let dx = x - 200;
+						let dy = y - 150;
+						let distance = Math.sqrt(dx*dx + dy*dy);
+						let distortAmount = 1 + (distance * distortionLevel) / 10000;
+						gridCtx.lineTo(200 + dx * distortAmount, 150 + dy * distortAmount);
+					}
+					gridCtx.stroke();
+				}
+			}
+
+			// Event Listeners
+			lensType.addEventListener('change', drawSimulator);
+			wrapAngle.addEventListener('input', drawSimulator);
+			
+			// Initial Draw
+			drawSimulator();
+		</script>
 	</body>
 </html>
